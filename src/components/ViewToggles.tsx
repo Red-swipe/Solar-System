@@ -18,21 +18,21 @@ export function ViewToggles({
   onToggleAsteroids,
 }: ViewTogglesProps) {
   return (
-    <div className="absolute top-4 right-4 flex flex-col gap-2">
+    <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
       <ToggleButton
-        icon={<Orbit size={16} />}
+        icon={<Orbit size={15} />}
         label="Orbits"
         active={showOrbits}
         onClick={onToggleOrbits}
       />
       <ToggleButton
-        icon={<Tag size={16} />}
+        icon={<Tag size={15} />}
         label="Labels"
         active={showLabels}
         onClick={onToggleLabels}
       />
       <ToggleButton
-        icon={<Sparkles size={16} />}
+        icon={<Sparkles size={15} />}
         label="Asteroids"
         active={showAsteroids}
         onClick={onToggleAsteroids}
@@ -55,14 +55,16 @@ function ToggleButton({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all backdrop-blur-xl border ${
+      className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 backdrop-blur-md border focus:outline-none focus:ring-1 focus:ring-blue-400 active:scale-95 ${
         active
-          ? 'bg-white/10 border-white/20 text-white'
-          : 'bg-black/40 border-white/5 text-gray-500 hover:text-gray-300'
+          ? 'bg-blue-600/25 border-blue-500/40 text-blue-200 shadow-md shadow-blue-900/20'
+          : 'bg-black/80 border-white/10 text-gray-400 hover:text-gray-200 hover:bg-white/5'
       }`}
+      aria-pressed={active}
+      title={`Toggle ${label}`}
     >
-      {icon}
-      {label}
+      <span className={active ? 'text-blue-400' : 'text-gray-500'}>{icon}</span>
+      <span>{label}</span>
     </button>
   );
 }

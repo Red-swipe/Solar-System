@@ -9,25 +9,30 @@
   
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: #000;
+    background: #010108;
     color: #fff;
     overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
   }
 }
 
-@layer utilities {
-  .animate-slideIn {
-    animation: slideIn 0.3s ease-out;
-  }
-}
-
-@keyframes slideIn {
+@keyframes cardSlideIn {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translate3d(24px, 0, 0);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

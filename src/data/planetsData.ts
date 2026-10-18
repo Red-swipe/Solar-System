@@ -226,3 +226,8 @@ export const PLANETS: PlanetData[] = [
     }
   }
 ];
+
+export function getPlanetDataByName(name: string): PlanetData | typeof SUN_DATA | undefined {
+  if (name === 'Sun') return SUN_DATA;
+  return PLANETS.find(p => p.name === name);
+}

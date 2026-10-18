@@ -100,8 +100,6 @@ export class SolarSystemEngine {
   // Reusable vectors/matrices to eliminate GC allocations
   private tempVecA = new THREE.Vector3();
   private tempVecB = new THREE.Vector3();
-  private tempVecC = new THREE.Vector3();
-  private tempVecD = new THREE.Vector3();
   private lastFollowPos = new THREE.Vector3();
   private cachedWidth = 0;
   private cachedHeight = 0;
@@ -807,7 +805,25 @@ export class SolarSystemEngine {
     const rawDelta = this.clock.getDelta();
     // Clamp delta to 50ms to prevent huge jumps on tab return
     const delta = Math.min(rawDelta, 0.05);
-    this.perfStats.frameTimeMs = Math.round(rawDelta * 10000) / 10;
+    const frameMs = rawDelta * 1000;
+    this.perfStats.frameTimeMs = Math.round(frameMs * 10) / 10;
+    
+    // Adaptive quality monitoring
+    this.rollingFrameTimes.push(frameMs);
+    if (this.rollingFrameTimes.length > 60) {
+      this.rollingFrameTimes.shift();
+      const avgMs = this.rollingFrameTimes.reduce((acc, v) => acc + v, 0) / this.rollingFrameTimes.length;
+      if (avgMs > 22 && this.perfStats.qualityTier === 'high') {
+        this.perfStats.qualityTier = 'medium';
+        this.renderer.setPixelRatio(1.0);
+        this.perfStats.pixelRatio = 1.0;
+      } else if (avgMs < 15 && this.perfStats.qualityTier === 'medium') {
+        this.perfStats.qualityTier = 'high';
+        const defaultRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+        this.renderer.setPixelRatio(defaultRatio);
+        this.perfStats.pixelRatio = defaultRatio;
+      }
+    }
     
     // Smooth speed transitions (exponential decay toward target)
     this.currentSpeed += (this.targetSpeed - this.currentSpeed) * (1 - Math.exp(-delta * 6));
@@ -1086,14 +1102,11 @@ export class SolarSystemEngine {
           item.geometry.dispose();
         }
         if (item.material) {
-          if (Array.isArray(item.material)) {
-            for (const mat of item.material) {
-              if (mat.map) mat.map.dispose();
-              mat.dispose();
-            }
-          } else {
-            if (item.material.map) item.material.map.dispose();
-            item.material.dispose();
+          const mats = Array.isArray(item.material) ? item.material : [item.material];
+          for (const mat of mats) {
+            const anyMat = mat as unknown as { map?: THREE.Texture };
+            if (anyMat.map) anyMat.map.dispose();
+            mat.dispose();
           }
         }
       }
